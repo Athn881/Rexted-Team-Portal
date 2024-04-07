@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takım Portalı Yönetici Paneli</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+        }
+        .container {
+            margin-top: 100px;
+            background-color: #00bcd4; /* Turkuaz */
+            width: 600px; /* Genişliği artırıldı */
+            margin: 50px auto;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px; /* Yeni eklendi */
+        }
+        .container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #fff;
+            padding: 20px;
+            background-color: #ff6f00; /* Turuncu */
+            border-radius: 10px 10px 0 0;
+        }
+        .container form {
+            display: none; /* Yeni eklendi */
+        }
+        .container input[type="text"],
+        .container input[type="password"] {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .container input[type="submit"] {
+            padding: 10px;
+            background-color: #ff6f00; /* Turuncu */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .container input[type="submit"]:hover {
+            background-color: #ff8f00; /* Turuncu (koyulaştırılmış) */
+        }
+        .hidden {
+            display: none;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between; /* Butonları yan yana düzenle */
+            margin-bottom: 20px; /* Boşluk ekledi */
+        }
+        .create-user-button,
+        .query-user-button,
+        .edit-user-button {
+            padding: 15px 30px;
+            background-color: #ff6f00; /* Turuncu */
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .create-user-button:hover,
+        .query-user-button:hover,
+        .edit-user-button:hover {
+            background-color: #ff8f00; /* Turuncu (koyulaştırılmış) */
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="adminPanel">
+        <h2>Yönetici Paneli</h2>
+        <div class="button-container">
+            <button class="create-user-button" onclick="showCreateUserForm()">Kullanıcı Hesabı Oluştur</button>
+            <button class="query-user-button" onclick="showAllUsers()">Kullanıcıları Görüntüle</button>
+            <button class="edit-user-button" onclick="redirectToEditUser()">Kullanıcı Bilgileri Düzenle</button>
+        </div>
+        <form id="create-user-form" action="#" method="post">
+            <input type="text" name="first_name" placeholder="İsim" required>
+            <input type="text" name="last_name" placeholder="Soyisim" required>
+            <input type="text" name="username" placeholder="Kullanıcı Adı" required>
+            <input type="password" name="password" placeholder="Şifre" required>
+            <select name="role" required>
+                <option value="" disabled selected>Rol Seçiniz</option>
+                <option value="Takım Kaptanı">Takım Kaptanı</option>
+                <option value="Mentör Öğretmen">Mentör Öğretmen</option>
+                <option value="Sosyal Medya">Sosya Medya</option>
+            </select>
+            <input type="submit" value="Kullanıcı Hesabı Oluştur">
+        </form>
+        <div id="user-info" class="hidden"></div>
+    </div>
+
+    <script>
+        // Oturum kontrolü ve diğer JavaScript kodları yine aynı şekilde kalır
+
+        function showCreateUserForm() {
+            document.getElementById("create-user-form").style.display = "block";
+            document.getElementById("user-info").style.display = "none";
+        }
+
+        function showAllUsers() {
+    var userListDiv = document.getElementById("user-info");
+    userListDiv.innerHTML = ""; // Önceki içeriği temizle
+
+    // Local storage'da kayıtlı tüm kullanıcıları al
+    for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key !== "loggedInUser") { // Oturum açık kullanıcıyı listeye alma
+            var userJSON = localStorage.getItem(key);
+            try {
+                var user = JSON.parse(userJSON);
+                // Kullanıcı bilgilerini liste olarak ekleyin
+                var userInfo = document.createElement("p");
+                userInfo.innerHTML = "<strong>İsim:</strong> " + user.first_name + " " + user.last_name + " - "
+                                    + "<strong>Rol:</strong> " + user.role + " - "
+                                    + "<strong>Kullanıcı Adı:</strong> " + user.username;
+                userListDiv.appendChild(userInfo);
+            } catch (error) {
+                console.error("Hata: " + error.message);
+            }
+        }
+    }
+    userListDiv.classList.remove("hidden");
+}
+
+        function redirectToEditUser() {
+            window.location.href = "kullanici_duzenleme.html"; // Kullanıcıyı düzenleme sayfasına yönlendirme
+        }
+
+        document.getElementById("create-user-form").addEventListener("submit", function(event) {
+            // Kullanıcı bilgilerini al ve local storage'a kaydet
+            var firstName = document.getElementsByName("first_name")[0].value;
+            var lastName = document.getElementsByName("last_name")[0].value;
+            var username = document.getElementsByName("username")[0].value;
+            var password = document.getElementsByName("password")[0].value;
+            var role = document.getElementsByName("role")[0].value;
+
+            var newUser = {
+                "first_name": firstName,
+                "last_name": lastName,
+                "username": username,
+                "password": password,
+                "role": role
+            };
+
+            localStorage.setItem(username, JSON.stringify(newUser));
+
+            alert("Kullanıcı hesabı oluşturuldu ve bilgiler kaydedildi.");
+            event.preventDefault(); // Formun normal gönderimini engelle
+        });
+    </script>
+</body>
+</html>

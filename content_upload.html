@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İçerik Yükleme Sayfası</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .upload-form {
+            margin-top: 20px;
+        }
+        .upload-form label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .upload-form input[type="file"] {
+            margin-bottom: 10px;
+        }
+        .upload-form textarea {
+            margin-bottom: 10px;
+            width: 100%;
+            height: 100px;
+            resize: none;
+        }
+        .upload-form input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .upload-form input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>İçerik Yükleme Sayfası</h2>
+        <div class="upload-form">
+            <form id="content-upload-form" action="#" method="post">
+                <label for="uploadFile">Dosya Seçin:</label>
+                <input type="file" id="uploadFile" accept="image/*, .pdf, .doc, .docx" required>
+                <label for="contentText">İçerik Yazısı:</label>
+                <textarea id="contentText" placeholder="İçerik yazısını buraya girin..." required></textarea>
+                <label for="targetRole">Hangi Rollere Paylaşılacak:</label>
+                <select id="targetRole" multiple required>
+                    <option value="Takım Kaptanı">Takım Kaptanı</option>
+                    <option value="Mentör Öğretmen">Mentör Öğretmen</option>
+                    <option value="Mekanik">Mekanik</option>
+                    <option value="Yazılım">Yazılım</option>
+                    <option value="Sosyal Medya">Sosyal Medya</option>
+                    <option value="Tüm Takım Üyeleri">Tüm Takım Üyeleri</option>
+                </select>
+                <input type="submit" value="Paylaş">
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("content-upload-form").addEventListener("submit", function(event) {
+            var file = document.getElementById("uploadFile").files[0];
+            var contentText = document.getElementById("contentText").value;
+            var selectedRoles = Array.from(document.getElementById("targetRole").selectedOptions).map(option => option.value);
+            
+            // İçeriği yükleme işlemleri (örneğin, sunucuya gönderme) burada yapılır.
+    
+            // İçeriği yükledikten sonra, seçilen rollerin sayfalarında içeriği göstermek için bir işlem yapılır.
+            selectedRoles.forEach(function(role) {
+                var contentToShow = "İçerik: " + contentText;
+                showContentInMainPage(role, contentToShow);
+            });
+    
+            event.preventDefault(); // Formun normal gönderimini engelle
+        });
+    
+        function showContentInMainPage(role, content) {
+            var roleMainPage = document.getElementById(role.replace(/\s+/g, '-').toLowerCase() + "-main-page");
+            if (roleMainPage) {
+                var contentDiv = document.createElement("div");
+                contentDiv.innerHTML = content;
+                roleMainPage.appendChild(contentDiv);
+            } else if (role === "Takım Kaptanı") {
+                // Takım kaptanı için özel sayfa gösterimi
+                var contentDiv = document.createElement("div");
+                contentDiv.innerHTML = content;
+                document.getElementById("takim-kaptani-main-page").appendChild(contentDiv);
+                // Takım kaptanı içerikleri sayfasına yönlendirme
+                window.location.href = "takim_kaptani_icerikler.html";
+            } else {
+                console.log(role + " için ana sayfa bulunamadı.");
+            }
+        }
+    </script>
+    
+</body>
+</html>

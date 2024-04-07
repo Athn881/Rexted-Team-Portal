@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Bilgileri Düzenleme</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+        }
+        .container {
+            margin-top: 100px;
+            background-color: #00bcd4; /* Turkuaz */
+            width: 600px; /* Genişliği artırıldı */
+            margin: 50px auto;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px; /* Yeni eklendi */
+        }
+        .container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #fff;
+            padding: 20px;
+            background-color: #ff6f00; /* Turuncu */
+            border-radius: 10px 10px 0 0;
+        }
+        .container form {
+            display: block; /* Formun görünür olması için display:block eklendi */
+        }
+        .container input[type="text"],
+        .container input[type="password"] {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .container input[type="submit"] {
+            padding: 10px;
+            background-color: #ff6f00; /* Turuncu */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .container input[type="submit"]:hover {
+            background-color: #ff8f00; /* Turuncu (koyulaştırılmış) */
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="userEditPanel">
+        <h2>Kullanıcı Bilgileri Düzenleme</h2>
+        <form id="edit-user-form" action="#" method="post">
+            <input type="text" id="editUsernameInput" placeholder="Kullanıcı Adı" required>
+            <input type="submit" value="Kullanıcı Bilgilerini Getir">
+        </form>
+        <div id="user-info" class="hidden"></div>
+    </div>
+
+    <script>
+        // Oturum kontrolü
+        window.onload = function() {
+            var loggedInUsername = localStorage.getItem("loggedInUsername");
+            if (!loggedInUsername) {
+                // Oturum değişkeni bulunamadı veya geçersiz, index.html'e yönlendir
+                window.location.href = "index.html";
+            }
+        };
+
+        document.getElementById("edit-user-form").addEventListener("submit", function(event) {
+            var username = document.getElementById("editUsernameInput").value;
+
+            // Kullanıcı bilgilerini sorgula
+            var userJSON = localStorage.getItem(username);
+            if (userJSON) {
+                var user = JSON.parse(userJSON);
+                // Kullanıcı bilgilerini ekrana yazdır
+                var userInfoDiv = document.getElementById("user-info");
+                userInfoDiv.innerHTML = "<p><strong>İsim:</strong> " + user.first_name + "</p>"
+                                     + "<p><strong>Soyisim:</strong> " + user.last_name + "</p>"
+                                     + "<p><strong>Şifre:</strong> " + user.password + "</p>"
+                                     + "<p><strong>Takımdaki Rolü:</strong> " + user.role + "</p>"
+                                     + "<button onclick=\"editUser('" + username + "')\">Kullanıcı Bilgilerini Düzenle</button>"
+                                     + "<button onclick=\"deleteUser('" + username + "')\">Kullanıcıyı Sil</button>"
+                                     + "<input type='file' accept='image/*' onchange=\"updateProfilePicture(this.files[0], '" + username + "')\">";
+                userInfoDiv.classList.remove("hidden");
+            } else {
+                alert("Kullanıcı bulunamadı.");
+            }
+
+            event.preventDefault(); // Formun normal gönderimini engelle
+        });
+
+        function editUser(username) {
+            var userJSON = localStorage.getItem(username);
+            if (userJSON) {
+                var user = JSON.parse(userJSON);
+                var newFirstName = prompt("Yeni İsim:", user.first_name);
+                var newLastName = prompt("Yeni Soyisim:", user.last_name);
+                var newPassword = prompt("Yeni Şifre:", user.password);
+                var newRole = prompt("Yeni Rol:", user.role);
+
+                if (newFirstName && newLastName && newPassword && newRole) {
+                    user.first_name = newFirstName;
+                    user.last_name = newLastName;
+                    user.password = newPassword;
+                    user.role = newRole;
+
+                    // Güncellenen kullanıcı bilgilerini local storage'a kaydet
+                    localStorage.setItem(username, JSON.stringify(user));
+                    alert("Kullanıcı bilgileri güncellendi.");
+                    // Yeniden yükleme yaparak güncellenmiş bilgileri göster
+                    location.reload();
+                } else {
+                    alert("Lütfen tüm bilgileri girin.");
+                }
+            } else {
+                alert("Kullanıcı bulunamadı.");
+            }
+        }
+
+        function deleteUser(username) {
+            var confirmation = confirm("Kullanıcıyı silmek istediğinizden emin misiniz?");
+            if (confirmation) {
+                localStorage.removeItem(username);
+                alert("Kullanıcı başarıyla silindi.");
+                // Yeniden yükleme yaparak güncel listeyi göster
+                location.reload();
+            }
+        }
+
+        function updateProfilePicture(file, username) {
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var imageUrl = event.target.result;
+                var userJSON = localStorage.getItem(username);
+                if (userJSON) {
+                    var user = JSON.parse(userJSON);
+                    user.profile_picture = imageUrl;
+                    localStorage.setItem(username, JSON.stringify(user));
+                    alert("Profil resmi başarıyla güncellendi.");
+                } else {
+                    alert("Kullanıcı bulunamadı.");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>

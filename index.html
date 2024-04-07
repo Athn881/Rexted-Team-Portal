@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takım Portalı</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+        }
+        #header {
+            background-color: #ff6f00; /* Turuncu */
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #logo {
+            width: 200px; /* Logo daha büyük */
+            height: auto;
+            margin-right: auto; /* Sağa yaslanmış */
+            margin-left: 20px; /* Logo ve kenar arasındaki boşluk */
+        }
+        #login {
+            padding: 20px;
+            background-color: #00bcd4; /* Turkuaz */
+            width: 300px;
+            margin: 50px auto;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        #login h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #login form {
+            display: flex;
+            flex-direction: column;
+        }
+        #login input[type="text"],
+        #login input[type="password"] {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #login input[type="submit"] {
+            padding: 10px;
+            background-color: #ff6f00; /* Turuncu */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #login input[type="submit"]:hover {
+            background-color: #ff8f00; /* Turuncu (koyulaştırılmış) */
+        }
+        #admin-login-form {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <img id="logo" src="Takım Amblem.png" alt="Takım Logosu">
+        <div id="login">
+            <h2>Giriş Yap</h2>
+            <form id="user-login-form">
+                <input type="text" name="username" placeholder="Kullanıcı Adı" required>
+                <input type="password" name="password" placeholder="Şifre" required>
+                <input type="submit" value="Giriş">
+            </form>
+            <div id="admin-login">
+                <h2>Yönetici Girişi</h2>
+                <form id="admin-login-form">
+                    <input type="text" name="admin_username" placeholder="Kullanıcı Adı" required>
+                    <input type="password" name="admin_password" placeholder="Şifre" required>
+                    <input type="text" name="security_code" placeholder="Güvenlik Kodu" required>
+                    <input type="submit" value="Giriş Yap">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("admin-login-form").style.display = "none";
+        });
+    
+        document.getElementById("admin-login").addEventListener("click", function() {
+            document.getElementById("user-login-form").style.display = "none";
+            document.getElementById("admin-login-form").style.display = "block";
+            document.getElementById("login").style.width = "auto";
+            document.getElementById("login").style.marginRight = "20px";
+        });
+    
+        document.getElementById("user-login-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var formData = new FormData(document.getElementById("user-login-form"));
+            var username = formData.get("username");
+            var password = formData.get("password");
+    
+            // Kullanıcı bilgilerini kontrol et
+            var userJSON = localStorage.getItem(username);
+            if (userJSON) {
+                var user = JSON.parse(userJSON);
+                // Şifreyi kontrol et
+                if (password === user.password) {
+                    // Doğrulama başarılı ise kullanıcı_sayfasi.html'ye yönlendir
+                    localStorage.setItem("loggedInUsername", username); // Kullanıcı adını sakla
+                    window.location.href = "kullanici_sayfasi.html"; // Yönlendirme yap
+                    return; // Fonksiyondan çık
+                }
+            }
+            alert("Kullanıcı adı veya şifre yanlış.");
+        });
+    
+        document.getElementById("admin-login-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var formData = new FormData(document.getElementById("admin-login-form"));
+            var adminUsername = formData.get("admin_username");
+            var adminPassword = formData.get("admin_password");
+            var securityCode = formData.get("security_code");
+    
+            // Yönetici bilgilerinin doğruluğunu kontrol et
+            if (adminUsername === "atahan.aydin" && adminPassword === "yeSPH987" && securityCode === "579413") {
+                localStorage.setItem("loggedInUsername", adminUsername); // Kullanıcı adını sakla
+                window.location.href = "yonetici_sayfasi.html"; // Yönlendirme yap
+            } else {
+                alert("Yönetici bilgileri yanlış.");
+            }
+        });
+    </script>
+</body>
+</html>

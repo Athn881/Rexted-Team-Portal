@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Sayfası</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .profile {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .profile-info {
+            display: flex;
+            align-items: center;
+            position: relative; /* Açılır panelin konumunu ayarlamak için */
+        }
+        .profile-info h3 {
+            margin-right: 10px;
+            color: #333;
+            cursor: pointer;
+        }
+        .profile-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .profile-image img {
+            width: 100%;
+            height: auto;
+        }
+        .logout-button {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            top: 70px; /* Profil resminin altından başlasın */
+            right: 0; /* Sağa hizalama */
+            padding: 10px; /* Açılır panelin içeriği için padding */
+        }
+        .dropdown-content button {
+            display: block;
+            width: 100%;
+            padding: 10px 20px;
+            margin-bottom: 10px; /* Butonlar arasında boşluk bırak */
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .dropdown-content button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile">
+            <div class="profile-info">
+                <div class="profile-image" id="profileImageContainer">
+                    <img id="profileImage" src="profile_picture.jpg" alt="Profil Resmi">
+                </div>
+                <h3 id="username">Kullanıcı Adı</h3>
+                <p id="role">Takımdaki Rolü</p>
+                <!-- Açılır panel -->
+                <div class="dropdown-content" id="dropdownContent">
+                    <button id="showContentButton" class="content-upload-button"></button>
+                    <button onclick="window.location.href='takim_takvimi.html'" class="content-upload-button">Takım Takvimi</button>
+                </div>
+            </div>
+            <button class="logout-button" onclick="logout()">Çıkış Yap</button>
+        </div>
+        <h2>Ana İçerik Alanı</h2>
+        <!-- Rol bazında içerik alanlarını ekleyin -->
+        <div id="Takım-Kaptanı-icerikleri" class="main-page" style="display: none;">
+            <!-- Takım Kaptanı için içerikler burada görüntülenecek -->
+        </div>
+        <div id="Mentör-Öğretmen-icerikleri" class="main-page" style="display: none;">
+            <!-- Mentör Öğretmen için içerikler burada görüntülenecek -->
+        </div>
+        <!-- Diğer roller için benzer şekilde devam edin -->
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var loggedInUsername = localStorage.getItem("loggedInUsername");
+            if (!loggedInUsername) {
+                window.location.href = "index.html";
+            } else {
+                var userJSON = localStorage.getItem(loggedInUsername);
+                if (userJSON) {
+                    var user = JSON.parse(userJSON);
+                    document.getElementById("username").textContent = user.first_name + " " + user.last_name;
+                    document.getElementById("role").textContent = user.role;
+                    var showContentButton = document.getElementById("showContentButton");
+                    if (showContentButton) {
+                        showContentButton.textContent = user.role + " İçerikleri";
+                        showContentButton.style.display = "block";
+                        showContentButton.addEventListener("click", function() {
+                            var rolePageId = user.role.replace(/\s+/g, '-').toLowerCase() + "-icerikleri";
+                            var roleMainPage = document.getElementById(rolePageId);
+                            if (roleMainPage) {
+                                roleMainPage.style.display = "block";
+                            } else {
+                                alert(user.role + " için içerikler bulunamadı.");
+                            }
+                        });
+                    }
+                } else {
+                    alert("Kullanıcı bilgileri bulunamadı.");
+                }
+            }
+
+            // Profil adına veya resmine tıklandığında açılır paneli göster/gizle
+            document.getElementById("username").addEventListener("click", toggleDropdown);
+            document.getElementById("profileImageContainer").addEventListener("click", toggleDropdown);
+
+            // Takım Takvimi butonuna tıklanınca yönlendirme
+            document.querySelector("#dropdownContent button:last-child").addEventListener("click", function() {
+                window.location.href = "takim_takvimi.html";
+            });
+        });
+
+        function toggleDropdown() {
+            var dropdownContent = document.getElementById("dropdownContent");
+            dropdownContent.style.display = dropdownContent.style.display === "block" ? "none" : "block";
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedInUsername");
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

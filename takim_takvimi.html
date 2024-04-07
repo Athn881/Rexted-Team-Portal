@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takım Takvimi</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.0/main.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #calendar {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        #eventList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #eventList li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .edit-button, .delete-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #007bff;
+            color: #fff;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .edit-button:hover, .delete-button:hover {
+            background-color: #0056b3;
+        }
+
+        #eventForm {
+            margin-top: 20px;
+        }
+
+        #eventForm input[type="text"], #eventForm input[type="submit"], #eventForm select {
+            padding: 10px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button-container button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .event-details {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .event-details label {
+            display: block;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Takım Takvimi</h1>
+        <div id="calendar"></div>
+
+        <h2>Görevler ve Etkinlikler</h2>
+        <ul id="eventList"></ul>
+
+        <h2>Görev Ekle</h2>
+        <form id="eventForm">
+            <input type="text" id="eventTitle" placeholder="Görev adı">
+            <input type="text" id="eventLocation" placeholder="Konum">
+            <textarea id="eventDescription" placeholder="Açıklama"></textarea>
+            <input type="datetime-local" id="eventStartTime" placeholder="Başlangıç zamanı">
+            <input type="datetime-local" id="eventEndTime" placeholder="Bitiş zamanı">
+            <select id="eventRepeat">
+                <option value="none">Tekrar Yok</option>
+                <option value="daily">Günlük</option>
+                <option value="weekly">Haftalık</option>
+                <option value="monthly">Aylık</option>
+            </select>
+            <select id="eventCategory">
+                <option value="work">İş</option>
+                <option value="personal">Kişisel</option>
+                <option value="holiday">Tatil</option>
+            </select>
+            <input type="submit" value="Ekle">
+        </form>
+
+        <div class="button-container">
+            <button id="clearEvents">Tüm Görevleri Sil</button>
+        </div>
+
+        <div class="event-details" id="eventDetails">
+            <label for="eventTitleDetail">Başlık:</label>
+            <input type="text" id="eventTitleDetail" readonly>
+            <label for="eventLocationDetail">Konum:</label>
+            <input type="text" id="eventLocationDetail" readonly>
+            <label for="eventDescriptionDetail">Açıklama:</label>
+            <textarea id="eventDescriptionDetail" readonly></textarea>
+            <label for="eventStartTimeDetail">Başlangıç Zamanı:</label>
+            <input type="text" id="eventStartTimeDetail" readonly>
+            <label for="eventEndTimeDetail">Bitiş Zamanı:</label>
+            <input type="text" id="eventEndTimeDetail" readonly>
+            <label for="eventCategoryDetail">Kategori:</label>
+            <input type="text" id="eventCategoryDetail" readonly>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.0/main.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: loadEvents(),
+                eventClick: function(info) {
+                    var event = info.event;
+                    $('#eventDetails #eventTitleDetail').val(event.title);
+                    $('#eventDetails #eventLocationDetail').val(event.extendedProps.location || '');
+                    $('#eventDetails #eventDescriptionDetail').val(event.extendedProps.description || '');
+                    $('#eventDetails #eventStartTimeDetail').val(event.start.toLocaleString());
+                    $('#eventDetails #eventEndTimeDetail').val(event.end.toLocaleString());
+                    $('#eventDetails #eventCategoryDetail').val(event.extendedProps.category || '');
+                    $('.event-details').show();
+                }
+            });
+            calendar.render();
+
+            $('#eventForm').submit(function(event) {
+                event.preventDefault();
+                var title = $('#eventTitle').val();
+                var location = $('#eventLocation').val();
+                var description = $('#eventDescription').val();
+                var startTime = $('#eventStartTime').val();
+                var endTime = $('#eventEndTime').val();
+                var repeat = $('#eventRepeat').val();
+                var category = $('#eventCategory').val();
+
+                var eventData = {
+                    title: title,
+                    start: startTime,
+                    end: endTime,
+                    extendedProps: {
+                        location: location,
+                        description: description,
+                        category: category
+                    }
+                };
+                if (repeat !== 'none') {
+                    eventData['recurrenceRule'] = {
+                        freq: repeat.toUpperCase()
+                    };
+                }
+                calendar.addEvent(eventData);
+                saveEvents();
+                $('#eventForm')[0].reset();
+            });
+
+            $('#clearEvents').click(function() {
+                calendar.getEvents().forEach(function(event) {
+                    event.remove();
+                });
+                saveEvents();
+            });
+
+            // Yeni düzenleme ve silme butonları için işlevler
+            $('#eventList').on('click', '.edit-button', function() {
+                // Düzenleme işlevi burada gerçekleştirilecek
+                alert('Düzenleme butonu tıklandı');
+            });
+
+            $('#eventList').on('click', '.delete-button', function() {
+                // Silme işlevi burada gerçekleştirilecek
+                alert('Silme butonu tıklandı');
+            });
+
+            function saveEvents() {
+                var events = [];
+                calendar.getEvents().forEach(function(event) {
+                    events.push({
+                        title: event.title,
+                        start: event.startStr,
+                        end: event.endStr,
+                        extendedProps: {
+                            location: event.extendedProps.location || '',
+                            description: event.extendedProps.description || '',
+                            category: event.extendedProps.category || ''
+                        }
+                    });
+                });
+                localStorage.setItem('events', JSON.stringify(events));
+            }
+
+            function loadEvents() {
+                var events = localStorage.getItem('events');
+                if (events) {
+                    return JSON.parse(events);
+                }
+                return [];
+            }
+        });
+    </script>
+</body>
+</html>
